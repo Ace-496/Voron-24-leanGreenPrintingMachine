@@ -1,0 +1,457 @@
+[include mainsail.cfg]
+[include autotune_tmc.cfg]
+[include KAMP_Settings.cfg]
+[include macros.cfg]
+[include delayed_gcode.cfg]
+[include shaketune.cfg]
+
+[exclude_object]
+[skew_correction]
+
+[gcode_arcs]
+resolution: 0.25
+
+[mcu]
+# serial: /dev/serial/by-id/<your-mcu-id>
+canbus_uuid: 394cca4d57a0
+
+[mcu EBBCan]
+canbus_uuid: 2c043f9c9d8b
+
+[virtual_sdcard]
+path: /home/voron/printer_data/gcodes
+on_error_gcode: CANCEL_PRINT
+
+[danger_options]
+multi_mcu_trsync_timeout: 0.05
+
+[save_variables]
+filename: ./variables
+
+[constants]
+run_current_ab:  1.6
+home_current_ab: 0.4
+run_current_z: 1.0
+# home_current_z: 
+microstep_z: 64
+
+[printer]
+kinematics: corexy
+max_velocity: 500  
+max_accel: 30000    			
+max_z_velocity: 25	
+max_z_accel: 350
+minimum_cruise_ratio: 0.0
+square_corner_velocity: 5.0
+
+[temperature_sensor MCU]
+sensor_type: temperature_mcu
+
+[temperature_sensor Toolhead]
+sensor_type: Generic 3950
+sensor_pin: EBBCan:gpio28
+
+[temperature_sensor CB2]
+sensor_type: temperature_host
+
+[temperature_sensor Chamber_Toolhead]
+sensor_type: Generic 3950
+sensor_pin: EBBCan:gpio27
+
+[stepper_x]
+step_pin: PE2
+dir_pin: PE1
+enable_pin: !PE4
+microsteps: 64
+rotation_distance: 40
+full_steps_per_rotation:200
+endstop_pin: tmc5160_stepper_x:virtual_endstop
+position_min: 0
+position_endstop: 353
+position_max: 353
+homing_speed: 80
+homing_accel: 1000
+homing_retract_dist: 5
+homing_positive_dir: true
+min_home_dist: 2
+
+[tmc5160 stepper_x]
+cs_pin: PE3
+spi_software_sclk_pin: PG8
+spi_software_mosi_pin: PG6
+spi_software_miso_pin: PG7
+run_current: ${constants.run_current_ab}
+home_current: ${constants.home_current_ab}
+sense_resistor: 0.075
+interpolate: True
+stealthchop_threshold: 0
+diag1_pin: ^!PF3
+driver_SGT: 0
+
+[stepper_y]
+step_pin: PE6
+dir_pin: PE5
+enable_pin: !PC14
+microsteps: 64
+rotation_distance: 40
+endstop_pin: tmc5160_stepper_y:virtual_endstop
+full_steps_per_rotation:200
+position_min: -2
+position_endstop: -2
+position_max: 350
+homing_speed: 80
+homing_accel: 1000
+homing_retract_dist: 5
+homing_positive_dir: false
+min_home_dist: 2
+
+[tmc5160 stepper_y]
+cs_pin: PC13
+spi_software_sclk_pin: PG8
+spi_software_mosi_pin: PG6
+spi_software_miso_pin: PG7
+run_current: ${constants.run_current_ab}
+home_current: ${constants.home_current_ab}
+sense_resistor: 0.075
+interpolate: True
+stealthchop_threshold: 0
+diag1_pin: ^!PF4
+driver_SGT: 0
+
+## Z0 Stepper - Front Left
+[stepper_z]
+step_pin: PC7
+dir_pin: PC8
+enable_pin: !PD2
+rotation_distance: 40
+gear_ratio: 80:16
+microsteps: ${constants.microstep_z}
+endstop_pin: probe:z_virtual_endstop
+position_max: 330
+position_min: -7
+homing_speed: 20
+second_homing_speed: 2
+homing_retract_dist: 2
+
+
+[tmc2209 stepper_z]
+uart_pin: PC6
+interpolate: true
+run_current: ${constants.run_current_z}
+sense_resistor: 0.110
+stealthchop_threshold: 0
+
+##	Z1 Stepper - Rear Left
+[stepper_z1]
+step_pin: PG13
+dir_pin: !PG12
+enable_pin: !PG15
+rotation_distance: 40
+gear_ratio: 80:16
+microsteps: ${constants.microstep_z}
+
+
+[tmc2209 stepper_z1]
+uart_pin: PG14
+interpolate: true
+run_current: ${constants.run_current_z}
+sense_resistor: 0.110
+stealthchop_threshold: 0
+
+##	Z2 Stepper - Rear Right
+[stepper_z2]
+step_pin: PG9
+dir_pin: PD7
+enable_pin: !PG11
+rotation_distance: 40
+gear_ratio: 80:16
+microsteps: ${constants.microstep_z}
+
+
+[tmc2209 stepper_z2]
+uart_pin: PG10
+interpolate: true
+run_current: ${constants.run_current_z}
+sense_resistor: 0.110
+stealthchop_threshold: 0
+
+##	Z3 Stepper - Front Right
+[stepper_z3]
+step_pin: PD4
+dir_pin: !PD3
+enable_pin: !PD6
+rotation_distance: 40
+gear_ratio: 80:16
+microsteps: ${constants.microstep_z}
+
+
+[tmc2209 stepper_z3]
+uart_pin: PD5
+interpolate: true
+run_current: ${constants.run_current_z}
+sense_resistor: 0.110
+stealthchop_threshold: 0
+
+[extruder]
+step_pin: EBBCan:gpio18
+dir_pin: EBBCan:gpio19
+enable_pin: !EBBCan:gpio17
+microsteps: 32
+rotation_distance: 22.7917817#22.905740611
+gear_ratio: 50:10
+nozzle_diameter: 0.400
+filament_diameter: 1.750
+heater_pin: EBBCan:gpio7
+pwm_cycle_time: 0.025
+#control: pid_v
+min_temp: 0
+max_temp: 355
+max_extrude_only_distance: 505
+max_extrude_cross_section: 20
+pressure_advance: 0.02 #0.014
+pressure_advance_smooth_time: 0.040
+min_extrude_temp: 0
+#pid_kp: 57.369
+#pid_ki: 2.533
+#pid_kd: 324.854
+sensor_type: MAX31865
+sensor_pin: EBBCan:gpio9
+spi_software_sclk_pin: EBBCan:gpio10
+spi_software_mosi_pin: EBBCan:gpio8
+spi_software_miso_pin: EBBCan:gpio11
+rtd_nominal_r: 100
+rtd_reference_r: 430
+rtd_num_of_wires: 2
+
+[tmc2209 extruder]
+uart_pin: EBBCan:gpio20
+interpolate: true
+run_current: 0.60
+stealthchop_threshold: 0
+sense_resistor: 0.110
+
+[heater_bed]
+heater_pin: PA0
+sensor_type: Generic 3950
+sensor_pin: PB1
+max_power: 1.0
+min_temp: 0
+max_temp: 115
+#control: pid
+#pid_kp: 58.437
+#pid_ki: 2.347
+#pid_kd: 363.769
+pwm_cycle_time: 0.2
+
+[probe]
+pin: !EBBCan:gpio22
+x_offset: 0
+y_offset: 0
+#z_offset: 0
+speed: 3
+lift_speed: 20
+samples: 2
+sample_retract_dist: 1.2
+samples_result: average
+samples_tolerance: 0.010
+samples_tolerance_retries: 1
+activate_gcode:
+    {% set PROBE_TEMP = 150 %}
+    {% set MAX_TEMP = PROBE_TEMP + 5 %}
+    {% set ACTUAL_TEMP = printer.extruder.temperature %}
+    {% set TARGET_TEMP = printer.extruder.target %}
+
+    {% if TARGET_TEMP > PROBE_TEMP %}
+        { action_respond_info('Extruder temperature target of %.1fC is too high, lowering to %.1fC' % (TARGET_TEMP, PROBE_TEMP)) }
+        M109 S{ PROBE_TEMP }
+    {% else %}
+        # Temperature target is already low enough, but nozzle may still be too hot.
+        {% if ACTUAL_TEMP > MAX_TEMP %}
+            { action_respond_info('Extruder temperature %.1fC is still too high, waiting until below %.1fC' % (ACTUAL_TEMP, MAX_TEMP)) }
+            TEMPERATURE_WAIT SENSOR=extruder MAXIMUM={ MAX_TEMP }
+        {% endif %}
+    {% endif %}
+
+[adxl345]
+cs_pin: EBBCan:gpio1
+spi_software_sclk_pin: EBBCan:gpio2
+spi_software_mosi_pin: EBBCan:gpio0
+spi_software_miso_pin: EBBCan:gpio3
+axes_map: z,-y,x
+
+[resonance_tester]
+probe_points: 175, 175, 50
+accel_chip: adxl345
+sweeping_period: 1.2
+
+[input_shaper]
+
+[fan]
+pin: EBBCan:gpio13
+kick_start_time: 0.6
+cycle_time: 0.00004
+hardware_pwm: true
+min_power: 0.04
+max_power: 1.0
+
+[heater_fan hotend_fan]
+pin: EBBCan:gpio14
+heater: extruder
+heater_temp: 70.0
+shutdown_speed: 1
+
+[controller_fan ebay_skirt_right]
+pin: PF9
+max_power: 1.0
+kick_start_time: 0.5
+fan_speed: 0.66
+heater: extruder, heater_bed
+idle_timeout: 120
+idle_speed: 0.33
+
+[neopixel toolhead_light]
+pin: EBBCan:gpio16
+chain_count: 3
+color_order: GRBW
+
+[output_pin caselight]
+#Chamber Lighting - HE3 Connector
+pin: PA3
+pwm:true
+shutdown_value: 0
+cycle_time: 0.01
+
+[idle_timeout]
+timeout: 86400
+
+[safe_z_home]
+home_xy_position: 175,340
+speed: 400
+z_hop: 5
+
+[quad_gantry_level]
+##	Use QUAD_GANTRY_LEVEL to level a gantry.
+##	Min & Max gantry corners - measure from nozzle at MIN (0,0) and 
+##	MAX (250, 250), (300,300), or (350,350) depending on your printer size
+##	to respective belt positions
+gantry_corners:
+	-55, -5 # -60,-10
+	400, 425 # 410,420
+#	Probe points
+points:
+	40,40
+	40,310
+	310,310
+	310,40
+speed: 400
+horizontal_move_z: 10
+adaptive_horizontal_move_z: True
+retries: 20
+retry_tolerance: 0.0075
+max_adjust: 10
+alternate_probe_direction: True
+
+[bed_mesh]
+speed: 500
+horizontal_move_z: 1.4
+mesh_min: 0,0
+mesh_max: 350,350
+probe_count: 19, 19
+split_delta_z: .01
+move_check_distance: 3.5
+mesh_pps: 4, 4
+algorithm: bicubic
+bicubic_tension: 0.5 #0.2
+
+[filament_switch_sensor SB_Extruder]
+pause_on_runout: True
+switch_pin: EBBCan:gpio21
+smart: true
+
+[firmware_retraction]
+retract_length: 0.1
+retract_speed: 100
+unretract_speed: 100
+
+
+[board_pins]
+aliases:
+    # EXP1 header
+    EXP1_1=PE7, EXP1_2=PG1,
+    EXP1_3=PG0, EXP1_4=PF15,
+    EXP1_5=PF14, EXP1_6=PF13,    # Slot in the socket on this side
+    EXP1_7=PF12, EXP1_8=PF11,
+    EXP1_9=<GND>, EXP1_10=<5V>,
+
+    # EXP2 header
+    EXP2_1=PE13, EXP2_2=PE12,
+    EXP2_3=PE15, EXP2_4=PE11,
+    EXP2_5=PE10, EXP2_6=PE14,      # Slot in the socket on this side
+    EXP2_7=PE8, EXP2_8=<RST>,
+    EXP2_9=<GND>, EXP2_10=<NC>
+
+#*# <---------------------- SAVE_CONFIG ---------------------->
+#*# DO NOT EDIT THIS BLOCK OR BELOW. The contents are auto-generated.
+#*#
+#*# [extruder]
+#*# pid_version = 1
+#*# pid_target = 275.00
+#*# pid_tolerance = 0.0130
+#*# control = pid_v
+#*# pid_kp = 25.254
+#*# pid_ki = 5.262
+#*# pid_kd = 30.304
+#*#
+#*# [heater_bed]
+#*# pid_version = 1
+#*# pid_target = 100.00
+#*# pid_tolerance = 0.0200
+#*# control = pid
+#*# pid_kp = 60.039
+#*# pid_ki = 2.862
+#*# pid_kd = 314.831
+#*#
+#*# [input_shaper]
+#*# shaper_type_x = mzv
+#*# shaper_freq_x = 52.6
+#*# shaper_type_y = mzv
+#*# shaper_freq_y = 45.2
+#*#
+#*# [probe]
+#*# z_offset = -0.685
+#*#
+#*# [bed_mesh default]
+#*# version = 1
+#*# points =
+#*# 	  -0.024802, -0.005427, -0.017302, -0.012927, -0.012927, 0.019573, 0.010823, 0.005823, -0.022927, -0.022927, -0.012927, -0.032302, -0.044177, -0.063552, -0.044177
+#*# 	  -0.031677, -0.016052, -0.012927, 0.026448, 0.005823, 0.004573, 0.013323, 0.007073, 0.023323, -0.031052, -0.012927, -0.036677, -0.052927, -0.049802, -0.047927
+#*# 	  -0.037927, -0.026052, -0.010427, 0.000823, -0.001677, 0.009573, 0.015198, 0.006448, -0.004177, -0.032927, -0.036677, -0.037927, -0.039802, -0.042302, -0.057927
+#*# 	  -0.025427, -0.004177, 0.000823, 0.008948, 0.015823, -0.001052, 0.012073, -0.023552, -0.016677, -0.026052, -0.037927, -0.037302, -0.051052, -0.054177, -0.062927
+#*# x_count = 15
+#*# y_count = 4
+#*# mesh_x_pps = 4
+#*# mesh_y_pps = 4
+#*# algo = bicubic
+#*# tension = 0.5
+#*# min_x = 44.9
+#*# max_x = 304.6
+#*# min_y = 162.28
+#*# max_y = 188.62
+#*#
+#*# [bed_mesh kamplast]
+#*# version = 1
+#*# points =
+#*# 	  -0.024802, -0.005427, -0.017302, -0.012927, -0.012927, 0.019573, 0.010823, 0.005823, -0.022927, -0.022927, -0.012927, -0.032302, -0.044177, -0.063552, -0.044177
+#*# 	  -0.031677, -0.016052, -0.012927, 0.026448, 0.005823, 0.004573, 0.013323, 0.007073, 0.023323, -0.031052, -0.012927, -0.036677, -0.052927, -0.049802, -0.047927
+#*# 	  -0.037927, -0.026052, -0.010427, 0.000823, -0.001677, 0.009573, 0.015198, 0.006448, -0.004177, -0.032927, -0.036677, -0.037927, -0.039802, -0.042302, -0.057927
+#*# 	  -0.025427, -0.004177, 0.000823, 0.008948, 0.015823, -0.001052, 0.012073, -0.023552, -0.016677, -0.026052, -0.037927, -0.037302, -0.051052, -0.054177, -0.062927
+#*# x_count = 15
+#*# y_count = 4
+#*# mesh_x_pps = 4
+#*# mesh_y_pps = 4
+#*# algo = bicubic
+#*# tension = 0.5
+#*# min_x = 44.9
+#*# max_x = 304.6
+#*# min_y = 162.28
+#*# max_y = 188.62
